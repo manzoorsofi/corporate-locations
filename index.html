@@ -40,7 +40,8 @@
   <body>
     <h1>Corporates Locations</h1>
     <div id="map"></div>
-    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBjsoB9I4N-HwzMGwzg7KlzWFYivekVYpM&callback=initMap" async defer></script>
+    <script src="https://unpkg.com/@googlemaps/markerclusterer@2.0.7/dist/index.min.js"></script>
     <script>
       // Sample data points
       const corporates = [
@@ -151,12 +152,9 @@
           }
         }
 
-        // Create a MarkerClusterer object
-        new MarkerClusterer(map, markers, {
-          imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
-        });
+        // Create a MarkerClusterer object using the new library
+        new markerClusterer.MarkerClusterer({ map, markers });
       }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBjsoB9I4N-HwzMGwzg7KlzWFYivekVYpM&callback=initMap" async defer></script>
   </body>
 </html>
