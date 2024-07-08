@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Corporates Map</title>
+    <style>
+      h1 {
+        text-align: center;
+      }
+      #map {
+        height: 90vh;
+        width: 100%;
+        width: 95vw;
+      }
+      .marker-info {
+        padding: 10px;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+      }
+      .marker-info h4 {
+        margin-top: 0;
+        margin-bottom: 5px;
+      }
+      .marker-info p {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      html,
+      body {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Corporates Locations</h1>
+    <div id="map"></div>
+    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+    <script>
+      // Sample data points
+      const corporates = [
+        { name: "TATA CONSULTANCY SERVICES LTD", employees: "10000+", pincodes: ["500019", "500081", "500084", "500032", "501510"] },
+        { name: "STATE BANK GROUP", employees: "1000-5000", pincodes: ["500096", "500003", "500001", "500084"] },
+        { name: "COGNIZANT", employees: "5000-10000", pincodes: ["500019", "500081"] },
+        { name: "LIFE INSURANCE CORPORATION OF INDIA", employees: "1000-5000", pincodes: ["500063"] },
+        { name: "DELOITTE", employees: "5000-10000", pincodes: ["500032", "500081", "500033"] },
+        { name: "ACCENTURE", employees: "5000-10000", pincodes: ["500032"] },
+        { name: "WELLS FARGO", employees: "1000-5000", pincodes: ["500032", "500049"] },
+        { name: "TECH MAHINDRA LTD", employees: "1000-5000", pincodes: ["500081", "500003", "500043"] },
+        { name: "AMAZON", employees: "1000-5000", pincodes: ["500032", "500082", "500081", "500075"] },
+        { name: "INFOSYS LIMITED", employees: "10000+", pincodes: ["500032", "500088"] },
+        { name: "WIPRO LIMITED", employees: "5000-10000", pincodes: ["500016", "500032", "500003"] },
+        { name: "ADP PRIVATE LIMITED", employees: "5000-10000", pincodes: ["500032"] },
+        { name: "HCL", employees: "1000-5000", pincodes: ["500081", "500075"] },
+        { name: "HDFC GROUP", employees: "1000-5000", pincodes: ["500034", "500016", "500081", "500004"] },
+        { name: "UNION BANK OF INDIA", employees: "1000-5000", pincodes: ["500082", "500003", "500004", "500001"] },
+        { name: "UHG GROUP(OPTUM)", employees: "1000-5000", pincodes: ["500081"] },
+        { name: "CAPGEMINI TECHNOLOGY SERVICES INDIA LTD", employees: "1000-5000", pincodes: ["500081", "500032", "500075"] },
+        { name: "RELIANCE GROUP OF COMPANIES - TELECOM", employees: "1000-5000", pincodes: ["500034"] },
+        { name: "MYLAN GROUP", employees: "1000-5000", pincodes: ["500034", "502325", "500043", "500081"] },
+        { name: "TELANGANA STATE ADVOCATES WELFARE TRUST", employees: "1000-5000", pincodes: ["500024"] }
+      ];
+
+      // Pincode to lat/lng mapping (sample data, you'll need actual lat/lng values for real use)
+      const pincodeToLatLng = {
+        "500019": { lat: 17.385044, lng: 78.486671 },
+        "500081": { lat: 17.448292, lng: 78.391735 },
+        "500084": { lat: 17.466628, lng: 78.372955 },
+        "500032": { lat: 17.494793, lng: 78.390179 },
+        "501510": { lat: 17.571912, lng: 78.469643 },
+        "500096": { lat: 17.440081, lng: 78.457403 },
+        "500003": { lat: 17.429769, lng: 78.489077 },
+        "500001": { lat: 17.383309, lng: 78.484290 },
+        "500063": { lat: 17.505038, lng: 78.457548 },
+        "500033": { lat: 17.387140, lng: 78.491684 },
+        "500049": { lat: 17.450659, lng: 78.372527 },
+        "500043": { lat: 17.398673, lng: 78.392298 },
+        "500082": { lat: 17.408501, lng: 78.457890 },
+        "500088": { lat: 17.423701, lng: 78.458720 },
+        "500016": { lat: 17.439499, lng: 78.395171 },
+        "500004": { lat: 17.375301, lng: 78.474750 },
+        "500034": { lat: 17.403200, lng: 78.464401 },
+        "502325": { lat: 17.511961, lng: 78.497102 },
+        "500024": { lat: 17.393998, lng: 78.465614 },
+        "500075": { lat: 17.470785, lng: 78.448442 }
+      };
+
+      function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 12,
+          center: { lat: 17.385044, lng: 78.486671 } // Centered on Hyderabad
+        });
+
+        const mergedData = {};
+        const markers = [];
+
+        corporates.forEach(corporate => {
+          corporate.pincodes.forEach(pincode => {
+            if (!mergedData[pincode]) {
+              mergedData[pincode] = {
+                corporates: [],
+                latLng: pincodeToLatLng[pincode]
+              };
+            }
+            mergedData[pincode].corporates.push({
+              name: corporate.name,
+              employees: corporate.employees
+            });
+          });
+        });
+
+        for (const pincode in mergedData) {
+          const data = mergedData[pincode];
+          if (data.latLng) {
+            const marker = new google.maps.Marker({
+              position: data.latLng,
+              title: `Pincode: ${pincode}`
+            });
+
+            const infowindowContent = `
+              <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5;">
+                <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">Pincode: ${pincode}</div>
+                ${data.corporates.map(corp => `
+                  <div style="margin-bottom: 8px;">
+                    <div style="font-weight: bold;">${corp.name}</div>
+                    <div>Employees: ${corp.employees}</div>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+
+            const infowindow = new google.maps.InfoWindow({
+              content: infowindowContent,
+              disableAutoPan: true
+            });
+
+            marker.addListener("mouseover", () => {
+              infowindow.open(map, marker);
+            });
+
+            marker.addListener("mouseout", () => {
+              infowindow.close();
+            });
+
+            markers.push(marker);
+          }
+        }
+
+        // Create a MarkerClusterer object
+        new MarkerClusterer(map, markers, {
+          imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+        });
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBjsoB9I4N-HwzMGwzg7KlzWFYivekVYpM&callback=initMap" async defer></script>
+  </body>
+</html>
